@@ -74,19 +74,22 @@
         }
         .tab.active { background: white; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
-        /* CONTENEDOR DE VISTAS */
+        /* CONTENEDOR DE VISTAS CON TRANSICIÓN SUAVE (SOLUCIÓN AL ERROR) */
         .view-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
         .view { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; flex-direction: column;
+            display: flex; flex-direction: column;
+            opacity: 0; visibility: hidden; pointer-events: none; /* Bloquea toques si está oculto */
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
-        .view.active { display: flex; }
+        .view.active { 
+            opacity: 1; visibility: visible; pointer-events: auto; z-index: 5;
+        }
 
-        /* VISTA REGISTRO: CENTRADO ABSOLUTO (CORREGIDO) */
+        /* VISTA REGISTRO: CENTRADO ABSOLUTO */
         #view-reg {
-            display: flex;
-            justify-content: center; /* Centrado horizontal */
-            align-items: center; /* Centrado vertical */
+            justify-content: center; 
+            align-items: center; 
             padding: 20px;
             box-sizing: border-box;
         }
@@ -119,7 +122,7 @@
             color: #000; box-sizing: border-box;
         }
 
-        /* TAGS COMPACTOS */
+        /* TAGS COMPACTOS Y PERSONALIZADO */
         .tag-row {
             display: flex; flex-wrap: wrap; gap: 6px;
             justify-content: center; 
@@ -130,7 +133,6 @@
         }
         .tag-chip.active { background: var(--accent); color: white; }
         
-        /* INPUT TAG PERSONALIZADO */
         .custom-tag-input {
             width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #E5E5EA;
             background: #FAFAFC; font-size: 13px; font-weight: 600; text-align: center; 
@@ -152,6 +154,7 @@
             padding: 15px 20px; overflow-y: auto;
             -webkit-overflow-scrolling: touch; touch-action: pan-y;
             height: 100%;
+            box-sizing: border-box;
         }
         .card {
             background: white; border-radius: 18px; padding: 18px;
@@ -239,9 +242,9 @@
     const funnyMessages = [
         "Buscando dónde escondieron la báscula...",
         "Haciendo hueco para más croquetas...",
-        "Calculando el índice de guapura de Riu y Sucre...",
+        "Calculando el índice de guapura...",
         "Sincronizando mimos y kilos...",
-        "Actualizando el historial de los reyes de la casa..."
+        "Actualizando el historial de los reyes..."
     ];
 
     window.onload = () => {
@@ -306,7 +309,7 @@
             }
 
             const tagLower = (d.etiqueta || "").toLowerCase();
-            let tagClass = "card-tag"; // Base class
+            let tagClass = "card-tag"; 
             if(tagLower.includes('vete')) tagClass += ' tag-vete';
             else if(tagLower.includes('pienso')) tagClass += ' tag-pienso';
             else if(tagLower.includes('vacuna')) tagClass += ' tag-vacuna';
@@ -331,14 +334,12 @@
         const w = document.getElementById('inp-w').value;
         if(!w) return;
         
-        // Obtener el tag final (si es "Otro", recoger el texto del input personalizado)
         let finalTag = selectedTag;
         if(selectedTag === 'Otro') {
             const customVal = document.getElementById('inp-custom-tag').value.trim();
-            finalTag = customVal ? customVal : 'Otro'; // Si lo deja en blanco, guardar como "Otro"
+            finalTag = customVal ? customVal : 'Otro'; 
         }
 
-        // Mostrar pantalla de carga con mensaje gracioso aleatorio
         const loader = document.getElementById('loader-overlay');
         const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
         document.getElementById('loader-msg').innerText = randomMsg;
@@ -352,9 +353,8 @@
                 body: JSON.stringify({ perro: selectedDog, peso: parseFloat(w), etiqueta: finalTag }) 
             });
             document.getElementById('inp-w').value = "";
-            document.getElementById('inp-custom-tag').value = ""; // Limpiar el input custom
+            document.getElementById('inp-custom-tag').value = ""; 
             
-            // Recargar datos y cambiar al historial
             await load();
             setTimeout(() => setView('hist'), 600);
         } catch (e) { 
