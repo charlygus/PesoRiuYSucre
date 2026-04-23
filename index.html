@@ -220,6 +220,7 @@
         lastRiu = lr ? lr.peso : '--';
         lastSucre = ls ? ls.peso : '--';
 
+        // Actualiza el HUD con el peso actual al cargar
         updateHUD("PESO ACTUAL", lastRiu, lastSucre);
 
         const ctx = document.getElementById('weightChart').getContext('2d');
@@ -256,9 +257,8 @@
                     tooltip: {
                         enabled: false, // Desactiva la caja nativa
                         external: function(context) {
-                            const tooltip = context.tooltip;
-                            if (tooltip.opacity === 0) {
-                                // Al soltar el dedo, vuelve al peso actual
+                            // Al soltar el dedo, vuelve al peso actual
+                            if (context.tooltip.opacity === 0) {
                                 updateHUD("PESO ACTUAL", lastRiu, lastSucre);
                                 document.getElementById('w-riu').style.color = 'var(--riu-color)';
                                 document.getElementById('w-sucre').style.color = 'var(--sucre-color)';
@@ -266,7 +266,7 @@
                             }
                             
                             // Al deslizar el dedo, actualiza el HUD
-                            const dataPoints = tooltip.dataPoints;
+                            const dataPoints = context.tooltip.dataPoints;
                             if(dataPoints.length > 0) {
                                 let date = dataPoints[0].raw.x;
                                 let rW = '--', sW = '--';
