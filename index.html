@@ -13,57 +13,76 @@
     
     <style>
         :root {
-            --ios-blue: #007AFF;
-            --ios-bg: #F2F2F7;
+            --bg-color: #F2F2F7;
             --card-bg: #FFFFFF;
+            --accent: #007AFF;
+            --text-main: #1C1C1E;
+            --text-sec: #8E8E93;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--ios-bg);
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            padding: 0;
-            color: #1C1C1E;
+            color: var(--text-main);
+            padding-bottom: 40px;
         }
 
-        /* Encabezado blanco para fundir el logo */
+        /* Header Unificado */
         .header {
-            background: white;
-            padding: 40px 20px 20px 20px;
+            padding: 60px 20px 30px;
             text-align: center;
-            border-bottom: 1px solid #D1D1D6;
         }
 
         .app-logo {
-            max-width: 220px;
-            height: auto;
-            /* Truco para quitar el fondo blanco del logo */
-            mix-blend-mode: multiply; 
+            max-width: 200px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
 
         .container {
-            padding: 20px;
-            max-width: 500px;
+            padding: 0 20px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
+        /* Dashboard de resumen */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 18px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .summary-card h3 { margin: 0; font-size: 14px; color: var(--text-sec); }
+        .summary-card .value { font-size: 22px; font-weight: 700; margin: 5px 0; color: var(--accent); }
+        .summary-card .subtext { font-size: 11px; color: var(--text-sec); }
+
+        /* Controles */
         .tabs {
             display: flex;
             background: #E3E3E3;
-            border-radius: 10px;
             padding: 2px;
+            border-radius: 12px;
             margin-bottom: 20px;
         }
 
         .tab {
             flex: 1;
+            padding: 10px;
             text-align: center;
-            padding: 8px;
             font-size: 14px;
             font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            color: #8E8E93;
+            border-radius: 10px;
+            color: var(--text-sec);
+            transition: 0.2s;
         }
 
         .tab.active {
@@ -72,87 +91,94 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .card {
+        .main-card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #8E8E93;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-sec);
+            margin-bottom: 10px;
             text-transform: uppercase;
         }
 
         select, input {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #C6C6C8;
+            background: var(--bg-color);
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
             font-size: 17px;
             margin-bottom: 20px;
+            outline: none;
             box-sizing: border-box;
-            background: #F2F2F7;
         }
 
         button {
             width: 100%;
-            background-color: var(--ios-blue);
+            background: var(--accent);
             color: white;
             border: none;
-            padding: 14px;
-            border-radius: 12px;
+            padding: 18px;
+            border-radius: 15px;
             font-size: 17px;
             font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
         }
 
-        button:disabled { background-color: #AEAEB2; }
+        button:active { transform: scale(0.97); }
 
-        #status {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            font-weight: 500;
-        }
+        #status { text-align: center; margin-top: 15px; font-weight: 500; font-size: 14px; }
 
-        .chart-container {
-            height: 300px;
-            width: 100%;
-        }
+        .chart-container { height: 350px; width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <img src="logo.png" alt="Riu & Sucre" class="app-logo">
+    <img src="logo.png" alt="Logo" class="app-logo">
 </div>
 
 <div class="container">
-    <div class="tabs">
-        <div class="tab active" id="t-reg" onclick="showSection('registro')">Registro</div>
-        <div class="tab" id="t-hist" onclick="showSection('historial')">Historial</div>
+    <div class="summary-grid">
+        <div class="summary-card">
+            <h3>Riu</h3>
+            <div class="value" id="last-riu">--kg</div>
+            <div class="subtext" id="age-riu">Cargando edad...</div>
+        </div>
+        <div class="summary-card">
+            <h3>Sucre</h3>
+            <div class="value" id="last-sucre">--kg</div>
+            <div class="subtext" id="age-sucre">Cargando edad...</div>
+        </div>
     </div>
 
-    <div id="s-registro" class="card">
-        <label>Perro</label>
+    <div class="tabs">
+        <div class="tab active" id="tab-reg" onclick="showSection('reg')">Nuevo Registro</div>
+        <div class="tab" id="tab-hist" onclick="showSection('hist')">Ver Evolución</div>
+    </div>
+
+    <div id="sec-reg" class="main-card">
+        <label>¿A quién pesamos?</label>
         <select id="perro">
             <option value="Riu">Riu</option>
             <option value="Sucre">Sucre</option>
         </select>
 
-        <label>Peso (kg)</label>
-        <input type="number" id="peso" step="0.1" inputmode="decimal" placeholder="Ej: 14.5">
+        <label>Peso en kilogramos</label>
+        <input type="number" id="peso" step="0.1" inputmode="decimal" placeholder="0.0">
 
-        <button onclick="enviar()" id="btn">Guardar Peso</button>
+        <button onclick="enviar()" id="btn">Guardar en Historial</button>
         <div id="status"></div>
     </div>
 
-    <div id="s-historial" class="card" style="display:none;">
-        <label>Evolución Quincenal</label>
+    <div id="sec-hist" class="main-card" style="display:none;">
+        <label>Gráfico de Crecimiento</label>
         <div class="chart-container">
             <canvas id="weightChart"></canvas>
         </div>
@@ -160,87 +186,91 @@
 </div>
 
 <script>
-    // IMPORTANTE: Asegúrate de que esta URL sea la de tu "Nueva Implementación"
+    // URL de tu Script de Google
     const URL = "https://script.google.com/macros/s/AKfycbyo31rwoDqHta-3-OfvXMPHmZyq70lWwxi7VT1zEQbHSjOnK_F1SC93PVO5U4XduNf50A/exec";
     let chart;
 
+    // Al cargar la app, traemos los datos
+    window.onload = () => cargarDatos();
+
     function showSection(s) {
-        document.getElementById('s-registro').style.display = s === 'registro' ? 'block' : 'none';
-        document.getElementById('s-historial').style.display = s === 'historial' ? 'block' : 'none';
-        document.getElementById('t-reg').classList.toggle('active', s === 'registro');
-        document.getElementById('t-hist').classList.toggle('active', s === 'historial');
-        if(s === 'historial') cargar();
+        document.getElementById('sec-reg').style.display = s === 'reg' ? 'block' : 'none';
+        document.getElementById('sec-hist').style.display = s === 'hist' ? 'block' : 'none';
+        document.getElementById('tab-reg').classList.toggle('active', s === 'reg');
+        document.getElementById('tab-hist').classList.toggle('active', s === 'hist');
     }
 
     async function enviar() {
         const p = document.getElementById('perro').value;
         const w = document.getElementById('peso').value;
-        const b = document.getElementById('btn');
+        const btn = document.getElementById('btn');
         const st = document.getElementById('status');
 
-        if(!w) return alert("Pon el peso");
+        if(!w || w <= 0) return;
 
-        b.disabled = true;
-        st.innerText = "⏳ Guardando...";
-        st.style.color = "gray";
+        btn.disabled = true;
+        st.innerText = "☁️ Sincronizando...";
+        st.style.color = "#8E8E93";
 
         try {
-            // Enviamos como texto plano para evitar bloqueos CORS en el POST de Google
-            await fetch(URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ perro: p, peso: parseFloat(w) })
-            });
-            
-            st.innerText = "✅ ¡Guardado con éxito!";
+            await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ perro: p, peso: parseFloat(w) }) });
+            st.innerText = "✅ ¡Peso guardado correctamente!";
             st.style.color = "#34C759";
             document.getElementById('peso').value = "";
+            cargarDatos(); // Recargar dashboard
         } catch (e) {
-            st.innerText = "❌ Error al guardar";
+            st.innerText = "❌ Error de conexión";
             st.style.color = "#FF3B30";
         } finally {
-            b.disabled = false;
+            btn.disabled = false;
         }
     }
 
-    async function cargar() {
+    async function cargarDatos() {
         try {
             const res = await fetch(URL);
             const data = await res.json();
-            
-            const datasets = {
-                Riu: { label: 'Riu', data: [], borderColor: '#8B4513', tension: 0.3 },
-                Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', tension: 0.3 }
-            };
+            actualizarUI(data);
+        } catch (e) { console.error("Error cargando", e); }
+    }
 
-            data.forEach(d => {
-                if(datasets[d.perro]) {
-                    datasets[d.perro].data.push({
-                        x: new Date(d.fecha).toLocaleDateString(),
-                        y: d.peso,
-                        edad: d.edad
-                    });
-                }
-            });
+    function actualizarUI(data) {
+        const datasets = {
+            Riu: { label: 'Riu', data: [], borderColor: '#8B4513', tension: 0.4, pointBackgroundColor: '#8B4513' },
+            Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', tension: 0.4, pointBackgroundColor: '#1C1C1E' }
+        };
 
-            const ctx = document.getElementById('weightChart').getContext('2d');
-            if(chart) chart.destroy();
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: { datasets: [datasets.Riu, datasets.Sucre] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: (c) => `${c.dataset.label}: ${c.raw.y}kg (${c.raw.edad})`
-                            }
-                        }
-                    }
+        let lastR = 0, lastS = 0, ageR = "", ageS = "";
+
+        data.forEach(d => {
+            if(datasets[d.perro]) {
+                datasets[d.perro].data.push({ x: new Date(d.fecha).toLocaleDateString(), y: d.peso, edad: d.edad });
+                if(d.perro === "Riu") { lastR = d.peso; ageR = d.edad; }
+                if(d.perro === "Sucre") { lastS = d.peso; ageS = d.edad; }
+            }
+        });
+
+        // Actualizar Dashboard
+        document.getElementById('last-riu').innerText = lastR + " kg";
+        document.getElementById('last-sucre').innerText = lastS + " kg";
+        document.getElementById('age-riu').innerText = ageR || "Calculando...";
+        document.getElementById('age-sucre').innerText = ageS || "Calculando...";
+
+        // Gráfico
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        if(chart) chart.destroy();
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: { datasets: Object.values(datasets) },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw.y}kg (${c.raw.edad})` } }
                 }
-            });
-        } catch (e) { console.error(e); }
+            }
+        });
     }
 </script>
 </body>
