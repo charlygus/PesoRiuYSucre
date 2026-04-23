@@ -10,267 +10,222 @@
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
-        :root {
-            --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --accent: #007AFF;
-            --text-main: #1C1C1E;
-            --text-sec: #8E8E93;
-        }
-
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg-color);
+        /* EVITAR SCROLL Y MOVIMIENTO */
+        html, body {
             margin: 0;
-            color: var(--text-main);
-            padding-bottom: 40px;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; /* Bloquea el scroll */
+            background-color: #FFFFFF; /* Fondo blanco para integrar logo */
+            font-family: -apple-system, system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Header Unificado */
+        /* CABECERA FIJA */
         .header {
-            padding: 60px 20px 30px;
+            padding: 50px 20px 10px;
             text-align: center;
+            flex-shrink: 0;
         }
 
         .app-logo {
-            max-width: 200px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+            height: 80px;
+            width: auto;
         }
 
-        .container {
-            padding: 0 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Dashboard de resumen */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .summary-card {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 18px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .summary-card h3 { margin: 0; font-size: 14px; color: var(--text-sec); }
-        .summary-card .value { font-size: 22px; font-weight: 700; margin: 5px 0; color: var(--accent); }
-        .summary-card .subtext { font-size: 11px; color: var(--text-sec); }
-
-        /* Controles */
-        .tabs {
+        /* RESUMEN RÁPIDO */
+        .summary {
             display: flex;
-            background: #E3E3E3;
-            padding: 2px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            justify-content: space-around;
+            padding: 10px 0;
+            background: #f8f8f8;
+            margin: 0 20px;
+            border-radius: 15px;
+            flex-shrink: 0;
         }
 
-        .tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 10px;
-            color: var(--text-sec);
-            transition: 0.2s;
+        .dog-info { text-align: center; }
+        .dog-info .name { font-size: 12px; color: #888; text-transform: uppercase; font-weight: bold; }
+        .dog-info .weight { font-size: 20px; font-weight: bold; color: #333; }
+
+        /* GRÁFICA OCUPANDO EL RESTO DEL ESPACIO */
+        .chart-area {
+            flex-grow: 1;
+            padding: 20px;
+            position: relative;
         }
 
-        .tab.active {
-            background: white;
-            color: black;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* PANEL DE ACCIÓN INFERIOR */
+        .actions {
+            padding: 20px;
+            background: #FFFFFF;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            padding-bottom: 40px; /* Espacio para barra de iPhone */
         }
 
-        .main-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--text-sec);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        select, input {
-            width: 100%;
-            background: var(--bg-color);
-            border: none;
+        input {
+            flex-grow: 1;
             padding: 15px;
             border-radius: 12px;
-            font-size: 17px;
-            margin-bottom: 20px;
-            outline: none;
-            box-sizing: border-box;
+            border: 1px solid #ddd;
+            font-size: 18px;
+            background: #f9f9f9;
         }
 
-        button {
-            width: 100%;
-            background: var(--accent);
+        select {
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+            font-weight: bold;
+        }
+
+        .btn-add {
+            background: #007AFF;
             color: white;
             border: none;
-            padding: 18px;
-            border-radius: 15px;
-            font-size: 17px;
-            font-weight: 600;
-            box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 16px;
         }
 
-        button:active { transform: scale(0.97); }
-
-        #status { text-align: center; margin-top: 15px; font-weight: 500; font-size: 14px; }
-
-        .chart-container { height: 350px; width: 100%; margin-top: 10px; }
+        /* ESTADO CARGANDO */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
 
+<div id="loading-overlay">Cargando datos...</div>
+
 <div class="header">
-    <img src="logo.png" alt="Logo" class="app-logo">
+    <img src="logo.png" alt="Riu & Sucre" class="app-logo">
 </div>
 
-<div class="container">
-    <div class="summary-grid">
-        <div class="summary-card">
-            <h3>Riu</h3>
-            <div class="value" id="last-riu">--kg</div>
-            <div class="subtext" id="age-riu">Cargando edad...</div>
-        </div>
-        <div class="summary-card">
-            <h3>Sucre</h3>
-            <div class="value" id="last-sucre">--kg</div>
-            <div class="subtext" id="age-sucre">Cargando edad...</div>
-        </div>
+<div class="summary">
+    <div class="dog-info">
+        <div class="name" style="color: #8B4513;">Riu</div>
+        <div class="weight" id="w-riu">-- kg</div>
     </div>
-
-    <div class="tabs">
-        <div class="tab active" id="tab-reg" onclick="showSection('reg')">Nuevo Registro</div>
-        <div class="tab" id="tab-hist" onclick="showSection('hist')">Ver Evolución</div>
+    <div class="dog-info">
+        <div class="name" style="color: #1C1C1E;">Sucre</div>
+        <div class="weight" id="w-sucre">-- kg</div>
     </div>
+</div>
 
-    <div id="sec-reg" class="main-card">
-        <label>¿A quién pesamos?</label>
-        <select id="perro">
-            <option value="Riu">Riu</option>
-            <option value="Sucre">Sucre</option>
-        </select>
+<div class="chart-area">
+    <canvas id="weightChart"></canvas>
+</div>
 
-        <label>Peso en kilogramos</label>
-        <input type="number" id="peso" step="0.1" inputmode="decimal" placeholder="0.0">
-
-        <button onclick="enviar()" id="btn">Guardar en Historial</button>
-        <div id="status"></div>
-    </div>
-
-    <div id="sec-hist" class="main-card" style="display:none;">
-        <label>Gráfico de Crecimiento</label>
-        <div class="chart-container">
-            <canvas id="weightChart"></canvas>
-        </div>
-    </div>
+<div class="actions">
+    <select id="sel-dog">
+        <option value="Riu">Riu</option>
+        <option value="Sucre">Sucre</option>
+    </select>
+    <input type="number" id="inp-weight" step="0.1" inputmode="decimal" placeholder="0.0 kg">
+    <button class="btn-add" onclick="save()">Añadir</button>
 </div>
 
 <script>
-    // URL de tu Script de Google
     const URL = "https://script.google.com/macros/s/AKfycbyo31rwoDqHta-3-OfvXMPHmZyq70lWwxi7VT1zEQbHSjOnK_F1SC93PVO5U4XduNf50A/exec";
     let chart;
 
-    // Al cargar la app, traemos los datos
-    window.onload = () => cargarDatos();
+    window.onload = load;
 
-    function showSection(s) {
-        document.getElementById('sec-reg').style.display = s === 'reg' ? 'block' : 'none';
-        document.getElementById('sec-hist').style.display = s === 'hist' ? 'block' : 'none';
-        document.getElementById('tab-reg').classList.toggle('active', s === 'reg');
-        document.getElementById('tab-hist').classList.toggle('active', s === 'hist');
-    }
-
-    async function enviar() {
-        const p = document.getElementById('perro').value;
-        const w = document.getElementById('peso').value;
-        const btn = document.getElementById('btn');
-        const st = document.getElementById('status');
-
-        if(!w || w <= 0) return;
-
-        btn.disabled = true;
-        st.innerText = "☁️ Sincronizando...";
-        st.style.color = "#8E8E93";
-
-        try {
-            await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ perro: p, peso: parseFloat(w) }) });
-            st.innerText = "✅ ¡Peso guardado correctamente!";
-            st.style.color = "#34C759";
-            document.getElementById('peso').value = "";
-            cargarDatos(); // Recargar dashboard
-        } catch (e) {
-            st.innerText = "❌ Error de conexión";
-            st.style.color = "#FF3B30";
-        } finally {
-            btn.disabled = false;
-        }
-    }
-
-    async function cargarDatos() {
+    async function load() {
         try {
             const res = await fetch(URL);
             const data = await res.json();
-            actualizarUI(data);
-        } catch (e) { console.error("Error cargando", e); }
+            render(data);
+            document.getElementById('loading-overlay').style.display = 'none';
+        } catch (e) { alert("Error cargando datos"); }
     }
 
-    function actualizarUI(data) {
-        const datasets = {
-            Riu: { label: 'Riu', data: [], borderColor: '#8B4513', tension: 0.4, pointBackgroundColor: '#8B4513' },
-            Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', tension: 0.4, pointBackgroundColor: '#1C1C1E' }
+    function render(data) {
+        const ds = {
+            Riu: { label: 'Riu', data: [], borderColor: '#8B4513', backgroundColor: '#8B4513', tension: 0.4, pointRadius: 4, hitRadius: 30 },
+            Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', backgroundColor: '#1C1C1E', tension: 0.4, pointRadius: 4, hitRadius: 30 }
         };
 
-        let lastR = 0, lastS = 0, ageR = "", ageS = "";
-
         data.forEach(d => {
-            if(datasets[d.perro]) {
-                datasets[d.perro].data.push({ x: new Date(d.fecha).toLocaleDateString(), y: d.peso, edad: d.edad });
-                if(d.perro === "Riu") { lastR = d.peso; ageR = d.edad; }
-                if(d.perro === "Sucre") { lastS = d.peso; ageS = d.edad; }
+            if(ds[d.perro]) {
+                ds[d.perro].data.push({ x: new Date(d.fecha).toLocaleDateString('es-ES', {day:'numeric', month:'short'}), y: d.peso, edad: d.edad });
             }
         });
 
-        // Actualizar Dashboard
-        document.getElementById('last-riu').innerText = lastR + " kg";
-        document.getElementById('last-sucre').innerText = lastS + " kg";
-        document.getElementById('age-riu').innerText = ageR || "Calculando...";
-        document.getElementById('age-sucre').innerText = ageS || "Calculando...";
+        // Actualizar pesos arriba con el último dato
+        const lastRiu = data.filter(d => d.perro === 'Riu').pop();
+        const lastSucre = data.filter(d => d.perro === 'Sucre').pop();
+        if(lastRiu) document.getElementById('w-riu').innerText = lastRiu.peso + " kg";
+        if(lastSucre) document.getElementById('w-sucre').innerText = lastSucre.peso + " kg";
 
-        // Gráfico
         const ctx = document.getElementById('weightChart').getContext('2d');
         if(chart) chart.destroy();
+
         chart = new Chart(ctx, {
             type: 'line',
-            data: { datasets: Object.values(datasets) },
+            data: { datasets: Object.values(ds) },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index', // AGRUPA DATOS: Al tocar cualquier parte vertical, muestra ambos perros
+                    intersect: false
+                },
                 plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw.y}kg (${c.raw.edad})` } }
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        titleColor: '#000',
+                        bodyColor: '#333',
+                        padding: 12,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        callbacks: {
+                            label: (c) => ` ${c.dataset.label}: ${c.raw.y}kg (${c.raw.edad})`
+                        }
+                    }
+                },
+                scales: {
+                    y: { position: 'right', grid: { color: '#f0f0f0' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
+    }
+
+    async function save() {
+        const p = document.getElementById('sel-dog').value;
+        const w = document.getElementById('inp-weight').value;
+        if(!w) return;
+
+        document.getElementById('loading-overlay').style.display = 'flex';
+        document.getElementById('loading-overlay').innerText = "Guardando...";
+
+        try {
+            await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ perro: p, peso: parseFloat(w) }) });
+            document.getElementById('inp-weight').value = "";
+            load(); // Recarga todo para ver el nuevo punto
+        } catch (e) {
+            alert("Error al guardar");
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
     }
 </script>
 </body>
