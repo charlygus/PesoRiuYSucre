@@ -38,19 +38,15 @@
             transition: opacity 0.4s ease;
         }
 
-        .loader-svg {
-            width: 200px;
-            height: auto;
-        }
+        .loader-svg { width: 200px; height: auto; }
 
-        /* La velocidad base era de ~2s. Al 1.8x, se queda en 1.11s */
         .anim-line {
             stroke-dasharray: 350;
             stroke-dashoffset: 350;
             animation: drawGraph 1.11s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
         }
         
-        .anim-sucre { animation-delay: 0.15s; } /* Ligero retraso para que siga a Riu */
+        .anim-sucre { animation-delay: 0.15s; }
 
         .anim-fade {
             opacity: 0;
@@ -71,12 +67,22 @@
         .header { padding: calc(10px + env(safe-area-inset-top)) 20px 5px; text-align: center; flex-shrink: 0; }
         .app-logo { height: 60px; width: auto; mix-blend-mode: multiply; }
 
+        /* HUD: PANEL FRONTAL DINÁMICO */
+        .hud-date-container {
+            text-align: center; margin-top: 5px; height: 18px;
+        }
+        #hud-date {
+            font-size: 11px; font-weight: 800; color: #8E8E93; letter-spacing: 0.5px;
+            background: #F2F2F7; padding: 4px 12px; border-radius: 10px;
+        }
+
         .summary {
-            display: flex; background: #F2F2F7; margin: 5px 20px;
+            display: flex; background: #F2F2F7; margin: 10px 20px 5px;
             border-radius: 14px; padding: 12px 0; flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .dog-info { text-align: center; width: 50%; }
-        .dog-info .weight { font-size: 18px; font-weight: 800; }
+        .dog-info .weight { font-size: 20px; font-weight: 800; transition: color 0.2s; }
         .dog-info .name { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #8E8E93; }
 
         .chart-area { flex-grow: 1; padding: 5px 15px; min-height: 0; }
@@ -113,8 +119,7 @@
         input:focus { border: 2px solid #007AFF; }
         
         .btn-save {
-            width: 50%; /* Botón reducido al 50% del tamaño anterior */
-            height: 44px; background: #007AFF; color: #FFF;
+            width: 50%; height: 44px; background: #007AFF; color: #FFF;
             border: none; border-radius: 10px; font-weight: 700; font-size: 15px;
         }
         .btn-save:active { opacity: 0.7; transform: scale(0.97); }
@@ -128,7 +133,6 @@
         <circle class="anim-fade" cx="100" cy="80" r="3.5" fill="#FFFFFF"/>
         <circle class="anim-fade" cx="160" cy="55" r="4" fill="#FFFFFF"/>
         <circle class="anim-fade" cx="175" cy="48" r="2.5" fill="#FFFFFF"/>
-
         <path class="anim-line" d="M 20,85 L 70,45 L 110,60 L 160,20 L 210,35" fill="none" stroke="#8B4513" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
         <path class="anim-fade" d="M 95,52 Q 110,80 125,52 Z" fill="#8B4513"/>
     </svg>
@@ -137,6 +141,10 @@
 
 <div class="header">
     <img src="logo.png" alt="Riu & Sucre" class="app-logo">
+</div>
+
+<div class="hud-date-container">
+    <span id="hud-date">PESO ACTUAL</span>
 </div>
 
 <div class="summary">
@@ -169,6 +177,7 @@
 <script>
     const URL = "https://script.google.com/macros/s/AKfycbyo31rwoDqHta-3-OfvXMPHmZyq70lWwxi7VT1zEQbHSjOnK_F1SC93PVO5U4XduNf50A/exec";
     let chart, selectedDog = "Riu";
+    let lastRiu = '--', lastSucre = '--';
 
     window.onload = load;
 
@@ -177,6 +186,12 @@
         document.getElementById('slider').style.transform = selectedDog === "Riu" ? "translateX(0)" : "translateX(100%)";
         document.getElementById('opt-riu').classList.toggle('active');
         document.getElementById('opt-sucre').classList.toggle('active');
+    }
+
+    function updateHUD(dateLabel, rWeight, sWeight) {
+        document.getElementById('hud-date').innerText = dateLabel;
+        document.getElementById('w-riu').innerText = rWeight !== '--' ? rWeight + " kg" : '--';
+        document.getElementById('w-sucre').innerText = sWeight !== '--' ? sWeight + " kg" : '--';
     }
 
     async function load() {
@@ -192,31 +207,86 @@
 
     function render(data) {
         const ds = {
-            Riu: { label: 'Riu', data: [], borderColor: '#8B4513', backgroundColor: '#8B4513', tension: 0.4, pointRadius: 2 },
-            Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', backgroundColor: '#1C1C1E', tension: 0.4, pointRadius: 2 }
+            Riu: { label: 'Riu', data: [], borderColor: '#8B4513', backgroundColor: '#8B4513', tension: 0.4, pointRadius: 0, hitRadius: 30, hoverRadius: 5 },
+            Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', backgroundColor: '#1C1C1E', tension: 0.4, pointRadius: 0, hitRadius: 30, hoverRadius: 5 }
         };
+        
         data.forEach(d => {
-            if(ds[d.perro]) ds[d.perro].data.push({ x: new Date(d.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short'}), y: d.weight || d.peso, edad: d.edad });
+            if(ds[d.perro]) ds[d.perro].data.push({ x: new Date(d.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short', year:'numeric'}), y: d.weight || d.peso, edad: d.edad });
         });
-        const lastR = data.filter(d => d.perro === 'Riu').pop();
-        const lastS = data.filter(d => d.perro === 'Sucre').pop();
-        if(lastR) document.getElementById('w-riu').innerText = lastR.peso + " kg";
-        if(lastS) document.getElementById('w-sucre').innerText = lastS.peso + " kg";
+        
+        const lr = data.filter(d => d.perro === 'Riu').pop();
+        const ls = data.filter(d => d.perro === 'Sucre').pop();
+        lastRiu = lr ? lr.peso : '--';
+        lastSucre = ls ? ls.peso : '--';
+
+        updateHUD("PESO ACTUAL", lastRiu, lastSucre);
 
         const ctx = document.getElementById('weightChart').getContext('2d');
         if(chart) chart.destroy();
+
+        // Plugin para dibujar la línea vertical que sigue al dedo
+        const verticalLinePlugin = {
+            id: 'verticalLine',
+            afterDraw: chart => {
+                if (chart.tooltip?._active?.length) {
+                    let x = chart.tooltip._active[0].element.x;
+                    let yAxis = chart.scales.y;
+                    let ctx = chart.ctx;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x, yAxis.top);
+                    ctx.lineTo(x, yAxis.bottom);
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = '#C6C6C8';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        };
+
         chart = new Chart(ctx, {
             type: 'line',
             data: { datasets: Object.values(ds) },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { display: false } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        enabled: false, // Desactiva la caja nativa
+                        external: function(context) {
+                            const tooltip = context.tooltip;
+                            if (tooltip.opacity === 0) {
+                                // Al soltar el dedo, vuelve al peso actual
+                                updateHUD("PESO ACTUAL", lastRiu, lastSucre);
+                                document.getElementById('w-riu').style.color = 'var(--riu-color)';
+                                document.getElementById('w-sucre').style.color = 'var(--sucre-color)';
+                                return;
+                            }
+                            
+                            // Al deslizar el dedo, actualiza el HUD
+                            const dataPoints = tooltip.dataPoints;
+                            if(dataPoints.length > 0) {
+                                let date = dataPoints[0].raw.x;
+                                let rW = '--', sW = '--';
+                                dataPoints.forEach(dp => {
+                                    if(dp.dataset.label === 'Riu') rW = dp.raw.y;
+                                    if(dp.dataset.label === 'Sucre') sW = dp.raw.y;
+                                });
+                                updateHUD(date, rW, sW);
+                                document.getElementById('w-riu').style.color = rW !== '--' ? 'var(--riu-color)' : '#C6C6C8';
+                                document.getElementById('w-sucre').style.color = sW !== '--' ? 'var(--sucre-color)' : '#C6C6C8';
+                            }
+                        }
+                    }
+                },
                 scales: { 
-                    y: { position: 'right', grid: { color: '#F2F2F7' } },
-                    x: { grid: { display: false } }
+                    y: { position: 'right', grid: { color: '#F2F2F7' }, border: { display: false } },
+                    x: { grid: { display: false }, border: { display: false }, ticks: { maxTicksLimit: 5 } }
                 }
-            }
+            },
+            plugins: [verticalLinePlugin]
         });
     }
 
