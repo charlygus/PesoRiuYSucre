@@ -18,7 +18,7 @@
             --ios-bg: #FFFFFF;
         }
 
-        /* BLOQUEO TOTAL DE MOVIMIENTO */
+        /* BLOQUEO TOTAL DE MOVIMIENTO PARA SENSACIÓN NATIVA */
         html, body {
             margin: 0; padding: 0;
             height: 100%; width: 100%;
@@ -30,7 +30,7 @@
             touch-action: none;
         }
 
-        /* LOADER CHAPA 3D DETALLADA */
+        /* PANTALLA DE CARGA: OPCIÓN 4 (CRECIMIENTO ABSTRACTO A 1.8x) */
         #loader-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #FFFFFF; display: flex; flex-direction: column;
@@ -38,51 +38,33 @@
             transition: opacity 0.4s ease;
         }
 
-        .chapa-container {
-            width: 120px; height: 120px;
-            perspective: 600px;
+        .loader-svg {
+            width: 200px;
+            height: auto;
         }
 
-        .chapa {
-            width: 100%; height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-            animation: flipChapa 2s infinite linear;
+        /* La velocidad base era de ~2s. Al 1.8x, se queda en 1.11s */
+        .anim-line {
+            stroke-dasharray: 350;
+            stroke-dashoffset: 350;
+            animation: drawGraph 1.11s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+        }
+        
+        .anim-sucre { animation-delay: 0.15s; } /* Ligero retraso para que siga a Riu */
+
+        .anim-fade {
+            opacity: 0;
+            animation: fadeInDetails 1.11s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
         }
 
-        .face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 50%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            border: 4px solid #C0C0C0; /* Efecto metal */
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+        @keyframes drawGraph {
+            0% { stroke-dashoffset: 350; }
+            100% { stroke-dashoffset: 0; }
         }
 
-        .face-riu {
-            background: linear-gradient(135deg, #A0522D, #8B4513);
-            color: white;
-        }
-
-        .face-sucre {
-            background: #1C1C1E;
-            color: white;
-            transform: rotateY(180deg);
-        }
-
-        /* Detalles Sucre (Pintas) */
-        .spot { position: absolute; background: white; border-radius: 50%; opacity: 0.8; }
-
-        .chapa-name { font-weight: 800; font-size: 14px; letter-spacing: 1px; margin-top: 5px; }
-        .chapa-ring { 
-            position: absolute; top: 10px; width: 12px; height: 12px; 
-            background: #FFFFFF; border-radius: 50%; border: 2px solid #C0C0C0;
-        }
-
-        @keyframes flipChapa {
-            0% { transform: rotateY(0); }
-            100% { transform: rotateY(360deg); }
+        @keyframes fadeInDetails {
+            0%, 60% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         /* ESTRUCTURA FIJA */
@@ -106,7 +88,7 @@
             flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
         }
 
-        /* TOGGLE ESTILO IOS */
+        /* TOGGLE ESTILO IOS (DESLIZANTE) */
         .toggle-box {
             position: relative; background: #F2F2F7; border-radius: 12px;
             display: flex; height: 40px; padding: 2px;
@@ -122,40 +104,35 @@
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1;
         }
 
-        /* FILA DE ENTRADA COMPACTA */
+        /* FILA DE ENTRADA COMPACTA Y BOTÓN REDUCIDO AL 50% */
         .input-group { display: flex; gap: 8px; align-items: center; }
         input {
             flex: 1; height: 44px; border-radius: 10px; border: none;
-            background: #F2F2F7; font-size: 18px; font-weight: 600; text-align: center;
+            background: #F2F2F7; font-size: 18px; font-weight: 600; text-align: center; outline: none;
         }
+        input:focus { border: 2px solid #007AFF; }
+        
         .btn-save {
-            width: 40%; height: 44px; background: #007AFF; color: #FFF;
+            width: 50%; /* Botón reducido al 50% del tamaño anterior */
+            height: 44px; background: #007AFF; color: #FFF;
             border: none; border-radius: 10px; font-weight: 700; font-size: 15px;
         }
-        .btn-save:active { opacity: 0.7; }
+        .btn-save:active { opacity: 0.7; transform: scale(0.97); }
     </style>
 </head>
 <body>
 
 <div id="loader-overlay">
-    <div class="chapa-container">
-        <div class="chapa">
-            <div class="face face-riu">
-                <div class="chapa-ring"></div>
-                <span style="font-size:24px">🧔</span>
-                <div class="chapa-name">RIU</div>
-            </div>
-            <div class="face face-sucre">
-                <div class="chapa-ring"></div>
-                <div class="spot" style="top:30%; left:20%; width:10px; height:10px;"></div>
-                <div class="spot" style="top:60%; left:70%; width:15px; height:15px;"></div>
-                <div class="spot" style="top:80%; left:40%; width:8px; height:8px;"></div>
-                <span style="font-size:24px">🐶</span>
-                <div class="chapa-name">SUCRE</div>
-            </div>
-        </div>
-    </div>
-    <div style="margin-top:20px; color:#8E8E93; font-weight:600; font-size:12px; letter-spacing:1px;">SINCRONIZANDO...</div>
+    <svg class="loader-svg" viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg">
+        <path class="anim-line anim-sucre" d="M 20,105 L 80,75 L 120,85 L 170,45 L 220,55" fill="none" stroke="#1C1C1E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle class="anim-fade" cx="100" cy="80" r="3.5" fill="#FFFFFF"/>
+        <circle class="anim-fade" cx="160" cy="55" r="4" fill="#FFFFFF"/>
+        <circle class="anim-fade" cx="175" cy="48" r="2.5" fill="#FFFFFF"/>
+
+        <path class="anim-line" d="M 20,85 L 70,45 L 110,60 L 160,20 L 210,35" fill="none" stroke="#8B4513" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="anim-fade" d="M 95,52 Q 110,80 125,52 Z" fill="#8B4513"/>
+    </svg>
+    <div style="margin-top:15px; color:#8E8E93; font-weight:600; font-size:12px; letter-spacing:1px;">SINCRONIZANDO...</div>
 </div>
 
 <div class="header">
