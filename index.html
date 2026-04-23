@@ -9,8 +9,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
             --riu-color: #8B4513;
@@ -50,6 +48,11 @@
         }
         @keyframes drawGraph { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
         @keyframes fadeInDetails { 0%, 50% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        
+        #loader-msg {
+            margin-top: 15px; color: #8E8E93; font-weight: 700; font-size: 13px; 
+            letter-spacing: 0.5px; text-align: center; max-width: 80%; line-height: 1.4;
+        }
 
         /* CABECERA */
         .header { 
@@ -67,35 +70,35 @@
         }
         .tab {
             flex: 1; padding: 10px; text-align: center; font-size: 13px;
-            font-weight: 700; border-radius: 10px; color: #8E8E93;
+            font-weight: 700; border-radius: 10px; color: #8E8E93; transition: 0.2s;
         }
         .tab.active { background: white; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
         /* CONTENEDOR DE VISTAS */
-        .view-container { flex-grow: 1; position: relative; width: 100%; }
+        .view-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
         .view { 
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; flex-direction: column;
-            width: 100%;
         }
         .view.active { display: flex; }
 
-        /* VISTA REGISTRO: CENTRADO ABSOLUTO */
+        /* VISTA REGISTRO: CENTRADO ABSOLUTO (CORREGIDO) */
         #view-reg {
-            justify-content: center;
-            align-items: center;
+            display: flex;
+            justify-content: center; /* Centrado horizontal */
+            align-items: center; /* Centrado vertical */
             padding: 20px;
             box-sizing: border-box;
         }
 
         .mega-card {
             background: white; border-radius: 28px;
-            width: 90%; max-width: 360px;
+            width: 100%; max-width: 360px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.06);
             display: flex; flex-direction: column; gap: 20px;
             box-sizing: border-box;
-            margin: 0 auto; /* Asegura el centrado horizontal */
+            margin: auto;
         }
 
         /* TOGGLE PERRO */
@@ -122,12 +125,20 @@
             justify-content: center; 
         }
         .tag-chip {
-            padding: 6px 10px; border-radius: 8px; background: #F2F2F7;
-            font-size: 10px; font-weight: 700; color: #8E8E93; text-transform: uppercase; transition: 0.2s;
+            padding: 6px 12px; border-radius: 8px; background: #F2F2F7;
+            font-size: 11px; font-weight: 700; color: #8E8E93; transition: 0.2s;
         }
         .tag-chip.active { background: var(--accent); color: white; }
+        
+        /* INPUT TAG PERSONALIZADO */
+        .custom-tag-input {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #E5E5EA;
+            background: #FAFAFC; font-size: 13px; font-weight: 600; text-align: center; 
+            outline: none; box-sizing: border-box; display: none; margin-top: 10px;
+        }
+        .custom-tag-input:focus { border-color: var(--accent); }
 
-        /* BOTÓN GUARDAR (Subido para evitar corte) */
+        /* BOTÓN GUARDAR */
         .btn-save {
             width: 100%; height: 50px; background: var(--accent); color: white;
             border: none; border-radius: 12px; font-weight: 700; font-size: 16px;
@@ -140,6 +151,7 @@
         .card-list {
             padding: 15px 20px; overflow-y: auto;
             -webkit-overflow-scrolling: touch; touch-action: pan-y;
+            height: 100%;
         }
         .card {
             background: white; border-radius: 18px; padding: 18px;
@@ -149,16 +161,15 @@
         .card-left { display: flex; flex-direction: column; gap: 5px; }
         .card-date { font-size: 11px; font-weight: 700; color: #8E8E93; text-transform: uppercase; }
         .card-perro { font-size: 17px; font-weight: 800; }
-        .card-tag { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; width: fit-content; text-transform: uppercase; }
+        .card-tag { font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 8px; width: fit-content; text-transform: uppercase; background: #F2F2F7; color: #8E8E93; }
         .card-right { text-align: right; }
         .card-weight { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
         .trend { font-size: 13px; font-weight: 700; }
         .card-age { font-size: 12px; color: #8E8E93; font-weight: 600; }
 
-        /* COLORES ETIQUETAS */
+        /* COLORES ETIQUETAS ESPECÍFICOS */
         .tag-vete { background: #FFEBEB; color: #FF3B30; }
         .tag-pienso { background: #FFF4E5; color: #FF9500; }
-        .tag-normal { background: #F2F2F7; color: #8E8E93; }
         .tag-vacuna { background: #EBF9EE; color: #34C759; }
     </style>
 </head>
@@ -171,6 +182,7 @@
         <circle class="anim-fade" cx="160" cy="55" r="4" fill="#1C1C1E" stroke="white" stroke-width="2"/>
         <path class="anim-fade" d="M 95,52 Q 110,80 125,52 Z" fill="#8B4513"/>
     </svg>
+    <div id="loader-msg">Iniciando...</div>
 </div>
 
 <div class="header">
@@ -196,11 +208,16 @@
                 <input type="number" id="inp-w" step="0.1" inputmode="decimal" placeholder="0.0">
             </div>
 
-            <div class="tag-row">
-                <div class="tag-chip active" onclick="setTag(this, 'Normal')">Normal</div>
-                <div class="tag-chip" onclick="setTag(this, 'Vete')">Vete</div>
-                <div class="tag-chip" onclick="setTag(this, 'Pienso')">Pienso</div>
-                <div class="tag-chip" onclick="setTag(this, 'Vacuna')">Vacuna</div>
+            <div class="input-wrapper">
+                <span class="input-label">Motivo del pesaje</span>
+                <div class="tag-row">
+                    <div class="tag-chip active" onclick="setTag(this, 'Normal')">Normal</div>
+                    <div class="tag-chip" onclick="setTag(this, 'Vete')">Vete</div>
+                    <div class="tag-chip" onclick="setTag(this, 'Pienso')">Pienso</div>
+                    <div class="tag-chip" onclick="setTag(this, 'Vacuna')">Vacuna</div>
+                    <div class="tag-chip" onclick="setTag(this, 'Otro')">Otro...</div>
+                </div>
+                <input type="text" id="inp-custom-tag" class="custom-tag-input" placeholder="Escribe el motivo...">
             </div>
 
             <button class="btn-save" onclick="save()">GUARDAR</button>
@@ -217,8 +234,20 @@
     let selectedDog = "Riu";
     let selectedTag = "Normal";
     let fullData = [];
+    let isFirstLoad = true;
 
-    window.onload = load;
+    const funnyMessages = [
+        "Buscando dónde escondieron la báscula...",
+        "Haciendo hueco para más croquetas...",
+        "Calculando el índice de guapura de Riu y Sucre...",
+        "Sincronizando mimos y kilos...",
+        "Actualizando el historial de los reyes de la casa..."
+    ];
+
+    window.onload = () => {
+        document.getElementById('loader-msg').innerText = "Estamos cargando el peso de Riu y Sucre 🐾";
+        load();
+    };
 
     function setView(v) {
         document.getElementById('view-reg').classList.toggle('active', v === 'reg');
@@ -239,6 +268,15 @@
         document.querySelectorAll('.tag-chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
         selectedTag = tag;
+        
+        const customInput = document.getElementById('inp-custom-tag');
+        if(tag === 'Otro') {
+            customInput.style.display = 'block';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.value = '';
+        }
     }
 
     async function load() {
@@ -247,13 +285,17 @@
             fullData = await res.json();
             document.getElementById('loader-overlay').style.opacity = '0';
             setTimeout(() => document.getElementById('loader-overlay').style.display = 'none', 400);
-        } catch (e) { console.error(e); }
+            isFirstLoad = false;
+        } catch (e) { 
+            document.getElementById('loader-msg').innerText = "Error de conexión. Inténtalo de nuevo.";
+        }
     }
 
     function renderCards() {
         const list = document.getElementById('hist-list');
         list.innerHTML = "";
         const reversed = [...fullData].reverse();
+        
         reversed.forEach((d, i) => {
             const prev = reversed.slice(i + 1).find(p => p.perro === d.perro);
             let diffHtml = "";
@@ -262,16 +304,20 @@
                 const color = diff > 0 ? "#FF3B30" : (diff < 0 ? "#34C759" : "#8E8E93");
                 diffHtml = `<span class="trend" style="color:${color}">${diff > 0 ? '↑' : (diff < 0 ? '↓' : '●')} ${Math.abs(diff)}kg</span>`;
             }
-            const tagLower = d.etiqueta.toLowerCase();
-            const tagClass = tagLower.includes('vete') ? 'tag-vete' : 
-                             tagLower.includes('pienso') ? 'tag-pienso' : 
-                             tagLower.includes('vacuna') ? 'tag-vacuna' : 'tag-normal';
+
+            const tagLower = (d.etiqueta || "").toLowerCase();
+            let tagClass = "card-tag"; // Base class
+            if(tagLower.includes('vete')) tagClass += ' tag-vete';
+            else if(tagLower.includes('pienso')) tagClass += ' tag-pienso';
+            else if(tagLower.includes('vacuna')) tagClass += ' tag-vacuna';
+            else tagClass += ' tag-normal';
+
             list.innerHTML += `
                 <div class="card">
                     <div class="card-left">
                         <span class="card-date">${new Date(d.fecha).toLocaleDateString('es-ES', {day:'numeric', month:'short'})}</span>
                         <span class="card-perro" style="color:${d.perro === 'Riu' ? 'var(--riu-color)' : 'var(--sucre-color)'}">${d.perro}</span>
-                        <span class="card-tag ${tagClass}">${d.etiqueta}</span>
+                        <span class="${tagClass}">${d.etiqueta}</span>
                     </div>
                     <div class="card-right">
                         <div class="card-weight">${d.peso}kg ${diffHtml}</div>
@@ -284,14 +330,36 @@
     async function save() {
         const w = document.getElementById('inp-w').value;
         if(!w) return;
+        
+        // Obtener el tag final (si es "Otro", recoger el texto del input personalizado)
+        let finalTag = selectedTag;
+        if(selectedTag === 'Otro') {
+            const customVal = document.getElementById('inp-custom-tag').value.trim();
+            finalTag = customVal ? customVal : 'Otro'; // Si lo deja en blanco, guardar como "Otro"
+        }
+
+        // Mostrar pantalla de carga con mensaje gracioso aleatorio
         const loader = document.getElementById('loader-overlay');
-        loader.style.display = 'flex'; loader.style.opacity = '1';
+        const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        document.getElementById('loader-msg').innerText = randomMsg;
+        loader.style.display = 'flex'; 
+        loader.style.opacity = '1';
+
         try {
-            await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ perro: selectedDog, peso: parseFloat(w), etiqueta: selectedTag }) });
+            await fetch(URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ perro: selectedDog, peso: parseFloat(w), etiqueta: finalTag }) 
+            });
             document.getElementById('inp-w').value = "";
-            load();
+            document.getElementById('inp-custom-tag').value = ""; // Limpiar el input custom
+            
+            // Recargar datos y cambiar al historial
+            await load();
             setTimeout(() => setView('hist'), 600);
-        } catch (e) { loader.style.display = 'none'; }
+        } catch (e) { 
+            document.getElementById('loader-msg').innerText = "Error al guardar. Revisa la conexión.";
+        }
     }
 </script>
 </body>
