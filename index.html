@@ -1,356 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Riu & Sucre</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prueba de Animaciones de Carga</title>
+<style>
+    body { 
+        font-family: -apple-system, system-ui, sans-serif; 
+        background: #FFFFFF; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        gap: 30px; 
+        padding: 40px 20px; 
+        color: #1C1C1E;
+    }
+    h2 { text-align: center; margin-bottom: 10px; }
     
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    .tarjeta { 
+        text-align: center; 
+        background: #F2F2F7; 
+        padding: 30px 20px; 
+        border-radius: 16px; 
+        width: 100%; 
+        max-width: 320px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
 
-    <style>
-        /* RESET Y BLOQUEO DE SCROLL */
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden; 
-            background-color: #FFFFFF;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            color: #1C1C1E;
-        }
+    /* OPCIÓN 1: El Anillo Identitario */
+    .ring-loader {
+        width: 50px; 
+        height: 50px; 
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        border: 5px solid #E5E5EA;
+        border-top-color: #8B4513; /* Marrón Riu */
+        border-bottom-color: #1C1C1E; /* Negro Sucre */
+        animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+    @keyframes spin { 
+        0% { transform: rotate(0deg); } 
+        100% { transform: rotate(360deg); } 
+    }
 
-        /* PANTALLA DE CARGA ANIMADA */
-        #loader-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #FFFFFF;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
-        
-        .dogs-loader {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+    /* OPCIÓN 2: Latido del Logo (Nombres) */
+    .text-loader {
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        gap: 8px; 
+        font-size: 28px; 
+        font-weight: 800; 
+        margin-bottom: 20px;
+        height: 50px;
+    }
+    .text-loader .riu { color: #8B4513; animation: pulseFade 1.5s infinite alternate; }
+    .text-loader .sucre { color: #1C1C1E; animation: pulseFade 1.5s infinite alternate 0.75s; } /* 0.75s de retraso para que vayan alternos */
+    @keyframes pulseFade { 
+        0% { opacity: 0.2; transform: scale(0.95); } 
+        100% { opacity: 1; transform: scale(1.05); } 
+    }
 
-        .dog-svg {
-            width: 80px;
-            height: 80px;
-            animation: pulse 1.5s infinite alternate ease-in-out;
-        }
-        
-        .dog-svg.sucre { animation-delay: 0.5s; }
+    /* OPCIÓN 3: La Línea de Crecimiento */
+    .bar-loader-container {
+        width: 100%; 
+        height: 8px; 
+        background: #E5E5EA; 
+        border-radius: 4px; 
+        overflow: hidden; 
+        margin: 20px 0 30px; 
+        position: relative;
+    }
+    .bar-loader {
+        height: 100%; 
+        width: 50%;
+        /* Mitad marrón, mitad negra */
+        background: linear-gradient(90deg, #8B4513 0%, #8B4513 50%, #1C1C1E 50%, #1C1C1E 100%);
+        animation: slideBar 1.5s ease-in-out infinite alternate;
+        border-radius: 4px;
+    }
+    @keyframes slideBar { 
+        0% { width: 20%; transform: translateX(0); } 
+        100% { width: 100%; transform: translateX(0); } 
+    }
 
-        @keyframes pulse {
-            0% { transform: scale(0.95); opacity: 0.7; }
-            100% { transform: scale(1.05); opacity: 1; }
-        }
-
-        .loader-text {
-            font-weight: 600;
-            color: #8E8E93;
-            font-size: 15px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* CABECERA */
-        .header {
-            padding: calc(20px + env(safe-area-inset-top)) 20px 10px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .app-logo { height: 70px; width: auto; mix-blend-mode: multiply; }
-
-        /* RESUMEN RÁPIDO */
-        .summary {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            background: #F2F2F7;
-            margin: 0 20px;
-            border-radius: 16px;
-            flex-shrink: 0;
-        }
-
-        .dog-info { text-align: center; width: 50%; }
-        .dog-info .name { font-size: 13px; text-transform: uppercase; font-weight: 700; }
-        .dog-info .weight { font-size: 22px; font-weight: 800; margin-top: 4px; }
-        .c-riu { color: #8B4513; }
-        .c-sucre { color: #1C1C1E; }
-
-        /* GRÁFICA */
-        .chart-area {
-            flex-grow: 1;
-            padding: 10px 20px;
-            position: relative;
-            min-height: 0; /* Importante para flexbox */
-        }
-
-        /* PANEL INFERIOR OPTIMIZADO PARA IPHONE 15 PRO */
-        .actions {
-            background: #FFFFFF;
-            border-top: 1px solid #E5E5EA;
-            padding: 15px 20px;
-            /* SAFE AREA: Añade el margen de la barra de iOS abajo */
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
-        }
-
-        /* SELECTOR DESLIZANTE (TOGGLE) */
-        .toggle-container {
-            position: relative;
-            background: #F2F2F7;
-            border-radius: 14px;
-            display: flex;
-            height: 46px;
-            padding: 3px;
-            box-sizing: border-box;
-        }
-
-        .toggle-btn {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 600;
-            font-size: 16px;
-            color: #8E8E93;
-            z-index: 2;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-
-        .toggle-btn.active { color: #1C1C1E; }
-
-        .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: calc(50% - 3px);
-            height: calc(100% - 6px);
-            background: #FFFFFF;
-            border-radius: 11px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            z-index: 1;
-        }
-
-        /* Fila de Input y Botón */
-        .input-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        input {
-            flex: 1;
-            padding: 0 15px;
-            border-radius: 14px;
-            border: 2px solid #F2F2F7;
-            font-size: 20px;
-            font-weight: 600;
-            background: #F2F2F7;
-            text-align: center;
-            outline: none;
-        }
-        input:focus { border-color: #007AFF; background: #FFFFFF; }
-
-        .btn-add {
-            background: #007AFF;
-            color: white;
-            border: none;
-            padding: 0 25px;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 17px;
-            cursor: pointer;
-        }
-        .btn-add:active { transform: scale(0.96); }
-
-    </style>
+    p { font-size: 14px; color: #8E8E93; margin: 10px 0 0; line-height: 1.4; }
+</style>
 </head>
 <body>
 
-<div id="loader-overlay">
-    <div class="dogs-loader">
-        <svg class="dog-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20,60 Q10,70 20,80 Q30,95 50,90 Q70,95 80,80 Q90,70 80,60 Q75,30 50,20 Q25,30 20,60" fill="#8B4513"/>
-            <path d="M30,80 L35,90 M40,85 L45,95 M60,85 L55,95 M70,80 L65,90" stroke="#5C2E0B" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="35" cy="50" r="4" fill="#1C1C1E"/>
-            <circle cx="65" cy="50" r="4" fill="#1C1C1E"/>
-        </svg>
-        <svg class="dog-svg sucre" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M25,55 Q20,70 30,85 Q50,95 70,85 Q80,70 75,55 Q70,30 50,25 Q30,30 25,55" fill="#1C1C1E"/>
-            <circle cx="40" cy="55" r="4" fill="#FFFFFF"/>
-            <circle cx="60" cy="55" r="4" fill="#FFFFFF"/>
-            <circle cx="35" cy="80" r="6" fill="#FFFFFF"/>
-            <circle cx="65" cy="75" r="5" fill="#FFFFFF"/>
-            <circle cx="50" cy="85" r="7" fill="#FFFFFF"/>
-        </svg>
-    </div>
-    <div class="loader-text" id="loader-msg">Sincronizando</div>
-</div>
+    <h2>Opciones de Carga</h2>
 
-<div class="header">
-    <img src="logo.png" alt="Riu & Sucre" class="app-logo">
-</div>
-
-<div class="summary">
-    <div class="dog-info">
-        <div class="name c-riu">Riu</div>
-        <div class="weight" id="w-riu">-- kg</div>
-    </div>
-    <div class="dog-info" style="border-left: 1px solid #D1D1D6;">
-        <div class="name c-sucre">Sucre</div>
-        <div class="weight" id="w-sucre">-- kg</div>
-    </div>
-</div>
-
-<div class="chart-area">
-    <canvas id="weightChart"></canvas>
-</div>
-
-<div class="actions">
-    <div class="toggle-container" id="dog-toggle">
-        <div class="toggle-slider" id="toggle-slider"></div>
-        <div class="toggle-btn active" onclick="setDog('Riu')">Riu</div>
-        <div class="toggle-btn" onclick="setDog('Sucre')">Sucre</div>
+    <div class="tarjeta">
+        <div class="ring-loader"></div>
+        <strong>1. El Anillo Identitario</strong>
+        <p>Un círculo minimalista que gira mezclando el marrón y el negro.</p>
     </div>
 
-    <div class="input-row">
-        <input type="number" id="inp-weight" step="0.1" inputmode="decimal" placeholder="0.0 kg">
-        <button class="btn-add" onclick="save()">Guardar</button>
+    <div class="tarjeta">
+        <div class="text-loader">
+            <span class="riu">Riu</span> <span style="color:#C6C6C8; font-weight: 400;">&</span> <span class="sucre">Sucre</span>
+        </div>
+        <strong>2. Latido del Logo</strong>
+        <p>Sus nombres laten e interactúan alternando colores mientras se conectan los datos.</p>
     </div>
-</div>
 
-<script>
-    const URL = "https://script.google.com/macros/s/AKfycbyo31rwoDqHta-3-OfvXMPHmZyq70lWwxi7VT1zEQbHSjOnK_F1SC93PVO5U4XduNf50A/exec";
-    let chart;
-    let selectedDog = "Riu"; // Por defecto Riu
+    <div class="tarjeta">
+        <div class="bar-loader-container">
+            <div class="bar-loader"></div>
+        </div>
+        <strong>3. Línea de Crecimiento</strong>
+        <p>Una barra de progreso fluida que arranca en marrón y termina en negro.</p>
+    </div>
 
-    window.onload = load;
-
-    // Lógica del Toggle (Interruptor)
-    function setDog(dog) {
-        selectedDog = dog;
-        const slider = document.getElementById('toggle-slider');
-        const btns = document.querySelectorAll('.toggle-btn');
-        
-        if (dog === 'Riu') {
-            slider.style.transform = 'translateX(0)';
-            btns[0].classList.add('active');
-            btns[1].classList.remove('active');
-        } else {
-            slider.style.transform = 'translateX(100%)';
-            btns[1].classList.add('active');
-            btns[0].classList.remove('active');
-        }
-    }
-
-    // Funciones de Base de Datos
-    async function load() {
-        try {
-            const res = await fetch(URL);
-            const data = await res.json();
-            render(data);
-            
-            // Ocultar loader con fundido
-            const loader = document.getElementById('loader-overlay');
-            loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
-
-        } catch (e) { 
-            document.getElementById('loader-msg').innerText = "Error de conexión";
-            document.getElementById('loader-msg').style.color = "red";
-        }
-    }
-
-    function render(data) {
-        const ds = {
-            Riu: { label: 'Riu', data: [], borderColor: '#8B4513', backgroundColor: '#8B4513', tension: 0.4, pointRadius: 3, hitRadius: 20 },
-            Sucre: { label: 'Sucre', data: [], borderColor: '#1C1C1E', backgroundColor: '#1C1C1E', tension: 0.4, pointRadius: 3, hitRadius: 20 }
-        };
-
-        data.forEach(d => {
-            if(ds[d.perro]) {
-                ds[d.perro].data.push({ x: new Date(d.fecha).toLocaleDateString('es-ES', {day:'numeric', month:'short'}), y: d.peso, edad: d.edad });
-            }
-        });
-
-        const lastRiu = data.filter(d => d.perro === 'Riu').pop();
-        const lastSucre = data.filter(d => d.perro === 'Sucre').pop();
-        if(lastRiu) document.getElementById('w-riu').innerText = lastRiu.peso + " kg";
-        if(lastSucre) document.getElementById('w-sucre').innerText = lastSucre.peso + " kg";
-
-        const ctx = document.getElementById('weightChart').getContext('2d');
-        if(chart) chart.destroy();
-
-        chart = new Chart(ctx, {
-            type: 'line',
-            data: { datasets: Object.values(ds) },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                layout: { padding: { top: 10, bottom: 10 } },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(255,255,255,0.95)',
-                        titleColor: '#8E8E93',
-                        bodyColor: '#1C1C1E',
-                        bodyFont: { weight: 'bold' },
-                        borderColor: '#E5E5EA',
-                        borderWidth: 1,
-                        padding: 10,
-                        callbacks: { label: (c) => ` ${c.dataset.label}: ${c.raw.y} kg` }
-                    }
-                },
-                scales: {
-                    y: { position: 'right', grid: { color: '#F2F2F7' }, border: { display: false } },
-                    x: { grid: { display: false }, border: { display: false } }
-                }
-            }
-        });
-    }
-
-    async function save() {
-        const w = document.getElementById('inp-weight').value;
-        if(!w) return;
-
-        const loader = document.getElementById('loader-overlay');
-        document.getElementById('loader-msg').innerText = "Guardando...";
-        document.getElementById('loader-msg').style.color = "#8E8E93";
-        loader.style.display = 'flex';
-        setTimeout(() => { loader.style.opacity = '1'; }, 10);
-
-        try {
-            await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ perro: selectedDog, peso: parseFloat(w) }) });
-            document.getElementById('inp-weight').value = "";
-            load(); 
-        } catch (e) {
-            alert("Error al guardar en Google Sheets");
-            loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
-        }
-    }
-</script>
 </body>
 </html>
