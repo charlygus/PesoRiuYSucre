@@ -1,1 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Riu & Sucre Tracker</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Perros Peso">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-bg);
+            margin: 0;
+            padding: 20px;
+            color: #1C1C1E;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #8E8E93;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #C6C6C8;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:active {
+            opacity: 0.7;
+        }
+
+        #status {
+            text-align: center;
+            font-size: 13px;
+            margin-top: 10px;
+            color: var(--ios-blue);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            background: #E3E3E3;
+            border-radius: 10px;
+            padding: 2px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .tab.active {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Riu & Sucre</h1>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showSection('registro')">Registro</div>
+        <div class="tab" onclick="showSection('historial')">Historial</div>
+    </div>
+
+    <div id="section-registro" class="card">
+        <label>¿Quién se pesó?</label>
+        <select id="perro">
+            <option value="Riu">Riu</option>
+            <option value="Sucre">Sucre</option>
+        </select>
+
+        <label>Peso (kg)</label>
+        <input type="number" id="peso" step="0.1" placeholder="Ej: 12.5" inputmode="decimal">
+
+        <button onclick="enviarDatos()" id="btn-enviar">Guardar Peso</button>
+        <div id="status"></div>
+    </div>
+
+    <div id="section-historial" class="card" style="display: none;">
+        <label>Evolución de peso</label>
+        <div class="chart-container">
+            <canvas id="weightChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyo31rwoDqHta-3-OfvXMPHmZyq70lWwxi7VT1zEQbHSjOnK_F1SC93PVO5U4XduNf50A/exec";
+    let myChart;
+
+    // Cambiar entre pestañas
+    function showSection(section) {
+        document.getElementById('section-registro').style.display = section === 'registro' ? 'block' : 'none';
+        document.getElementById('section-historial').style.display = section === 'historial' ? 'block' : 'none';
+        
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (section === 'historial') {
+            cargarHistorial();
+        }
+    }
+
+    // Enviar datos a Google Sheets
+    async function enviarDatos() {
+        const perro = document.getElementById('perro').value;
+        const peso = document.getElementById('peso').value;
+        const status = document.getElementById('status');
+        const btn = document.getElementById('btn-enviar');
+
+        if (!peso) {
+            alert("Por favor, pon un peso");
+            return;
+        }
+
+        btn.disabled = true;
+        status.innerText = "Enviando...";
+
+        const payload = {
+            perro: perro,
+            peso: parseFloat(peso)
+        };
+
+        try {
+            // Usamos mode 'no-cors' si hay problemas, pero el script de Fase 1 devuelve JSON directo
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                body: JSON.stringify(payload)
+            });
+            
+            status.innerText = "✅ ¡Guardado!";
+            document.getElementById('peso').value = "";
+            setTimeout(() => { status.innerText = ""; }, 3000);
+        } catch (error) {
+            status.innerText = "❌ Error al guardar";
+            console.error(error);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // Cargar historial y dibujar gráfico
+    async function cargarHistorial() {
+        try {
+            const response = await fetch(WEB_APP_URL);
+            const data = await response.json();
+            
+            const datasets = {
+                Riu: { label: 'Riu', data: [], borderColor: '#007AFF', backgroundColor: '#007AFF', tension: 0.3 },
+                Sucre: { label: 'Sucre', data: [], borderColor: '#FF9500', backgroundColor: '#FF9500', tension: 0.3 }
+            };
+
+            data.forEach(entry => {
+                if (datasets[entry.perro]) {
+                    datasets[entry.perro].data.push({
+                        x: new Date(entry.fecha).toLocaleDateString(),
+                        y: entry.peso,
+                        edad: entry.edad // Guardamos la edad para el tooltip
+                    });
+                }
+            });
+
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            
+            if (myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [datasets.Riu, datasets.Sucre]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return `${context.dataset.label}: ${point.y} kg (${point.edad})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Error cargando historial:", error);
+        }
+    }
+</script>
+
+</body>
+</html>
