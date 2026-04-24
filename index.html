@@ -18,6 +18,7 @@
             --accent: #007AFF;
         }
 
+        /* BLOQUEO DE MOVIMIENTO DEL SISTEMA */
         html, body {
             margin: 0; padding: 0;
             height: 100%; width: 100%;
@@ -29,7 +30,7 @@
             touch-action: none;
         }
 
-        /* CARGA DINÁMICA 1.8x */
+        /* PANTALLA DE CARGA (OPCIÓN 4 - 1.8x) */
         #loader-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #FFFFFF; display: flex; flex-direction: column;
@@ -42,7 +43,9 @@
             animation: drawGraph 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
         }
         .anim-sucre { animation-delay: 0.1s; }
-        .anim-fade { opacity: 0; animation: fadeInDetails 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate; }
+        .anim-fade {
+            opacity: 0; animation: fadeInDetails 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+        }
         @keyframes drawGraph { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
         @keyframes fadeInDetails { 0%, 50% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         
@@ -51,6 +54,7 @@
             letter-spacing: 0.5px; text-align: center; max-width: 80%; line-height: 1.4;
         }
 
+        /* CABECERA */
         .header { 
             background: white;
             padding: calc(15px + env(safe-area-inset-top)) 20px 10px; 
@@ -59,6 +63,7 @@
         }
         .app-logo { height: 50px; width: auto; mix-blend-mode: multiply; }
 
+        /* TABS */
         .tabs {
             display: flex; background: #E3E3E3; margin: 15px 20px 0;
             border-radius: 12px; padding: 2px; flex-shrink: 0;
@@ -69,17 +74,26 @@
         }
         .tab.active { background: white; color: black; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
+        /* CONTENEDOR DE VISTAS CON TRANSICIÓN SUAVE (SOLUCIÓN AL ERROR) */
         .view-container { flex-grow: 1; position: relative; width: 100%; overflow: hidden; }
         .view { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column;
-            opacity: 0; visibility: hidden; pointer-events: none;
-            transition: opacity 0.3s ease;
+            opacity: 0; visibility: hidden; pointer-events: none; /* Bloquea toques si está oculto */
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
-        .view.active { opacity: 1; visibility: visible; pointer-events: auto; }
+        .view.active { 
+            opacity: 1; visibility: visible; pointer-events: auto; z-index: 5;
+        }
 
-        /* MEGA TARJETA CENTRADA */
-        #view-reg { justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        /* VISTA REGISTRO: CENTRADO ABSOLUTO */
+        #view-reg {
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
         .mega-card {
             background: white; border-radius: 28px;
             width: 100%; max-width: 360px;
@@ -90,6 +104,7 @@
             margin: auto;
         }
 
+        /* TOGGLE PERRO */
         .toggle-perro {
             position: relative; background: #F2F2F7; border-radius: 12px;
             display: flex; height: 46px; padding: 2px;
@@ -98,6 +113,7 @@
         .t-opt.active { color: #000; }
         .t-slider { position: absolute; background: #FFF; width: calc(50% - 3px); height: 42px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; }
 
+        /* INPUT DE PESO */
         .input-wrapper { text-align: center; }
         .input-label { font-size: 10px; font-weight: 800; color: #8E8E93; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
         input[type="number"] {
@@ -106,7 +122,11 @@
             color: #000; box-sizing: border-box;
         }
 
-        .tag-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+        /* TAGS COMPACTOS Y PERSONALIZADO */
+        .tag-row {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            justify-content: center; 
+        }
         .tag-chip {
             padding: 6px 12px; border-radius: 8px; background: #F2F2F7;
             font-size: 11px; font-weight: 700; color: #8E8E93; transition: 0.2s;
@@ -118,7 +138,9 @@
             background: #FAFAFC; font-size: 13px; font-weight: 600; text-align: center; 
             outline: none; box-sizing: border-box; display: none; margin-top: 10px;
         }
+        .custom-tag-input:focus { border-color: var(--accent); }
 
+        /* BOTÓN GUARDAR */
         .btn-save {
             width: 100%; height: 50px; background: var(--accent); color: white;
             border: none; border-radius: 12px; font-weight: 700; font-size: 16px;
@@ -127,8 +149,13 @@
         }
         .btn-save:active { opacity: 0.7; transform: scale(0.97); }
 
-        /* HISTORIAL */
-        .card-list { padding: 15px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; height: 100%; box-sizing: border-box; }
+        /* VISTA HISTORIAL: TARJETAS */
+        .card-list {
+            padding: 15px 20px; overflow-y: auto;
+            -webkit-overflow-scrolling: touch; touch-action: pan-y;
+            height: 100%;
+            box-sizing: border-box;
+        }
         .card {
             background: white; border-radius: 18px; padding: 18px;
             margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
@@ -143,6 +170,7 @@
         .trend { font-size: 13px; font-weight: 700; }
         .card-age { font-size: 12px; color: #8E8E93; font-weight: 600; }
 
+        /* COLORES ETIQUETAS ESPECÍFICOS */
         .tag-vete { background: #FFEBEB; color: #FF3B30; }
         .tag-pienso { background: #FFF4E5; color: #FF9500; }
         .tag-vacuna { background: #EBF9EE; color: #34C759; }
@@ -177,12 +205,14 @@
                 <div id="opt-riu" class="t-opt active">RIU</div>
                 <div id="opt-sucre" class="t-opt">SUCRE</div>
             </div>
+            
             <div class="input-wrapper">
                 <span class="input-label">PESO (kg)</span>
                 <input type="number" id="inp-w" step="0.1" inputmode="decimal" placeholder="0.0">
             </div>
+
             <div class="input-wrapper">
-                <span class="input-label">Motivo</span>
+                <span class="input-label">Motivo del pesaje</span>
                 <div class="tag-row">
                     <div class="tag-chip active" onclick="setTag(this, 'Normal')">Normal</div>
                     <div class="tag-chip" onclick="setTag(this, 'Vete')">Vete</div>
@@ -192,19 +222,22 @@
                 </div>
                 <input type="text" id="inp-custom-tag" class="custom-tag-input" placeholder="Escribe el motivo...">
             </div>
+
             <button class="btn-save" onclick="save()">GUARDAR</button>
         </div>
     </div>
+
     <div id="view-hist" class="view">
         <div class="card-list" id="hist-list"></div>
     </div>
 </div>
 
 <script>
-    const URL = "TU_URL_DE_APPS_SCRIPT_AQUÍ";
+    const URL = "https://script.google.com/macros/s/AKfycbyo31rwoDqHta-3-OfvXMPHmZyq70lWwxi7VT1zEQbHSjOnK_F1SC93PVO5U4XduNf50A/exec";
     let selectedDog = "Riu";
     let selectedTag = "Normal";
     let fullData = [];
+    let isFirstLoad = true;
 
     const funnyMessages = [
         "Buscando dónde escondieron la báscula...",
@@ -238,7 +271,15 @@
         document.querySelectorAll('.tag-chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
         selectedTag = tag;
-        document.getElementById('inp-custom-tag').style.display = tag === 'Otro' ? 'block' : 'none';
+        
+        const customInput = document.getElementById('inp-custom-tag');
+        if(tag === 'Otro') {
+            customInput.style.display = 'block';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.value = '';
+        }
     }
 
     async function load() {
@@ -247,13 +288,17 @@
             fullData = await res.json();
             document.getElementById('loader-overlay').style.opacity = '0';
             setTimeout(() => document.getElementById('loader-overlay').style.display = 'none', 400);
-        } catch (e) { document.getElementById('loader-msg').innerText = "Error de conexión."; }
+            isFirstLoad = false;
+        } catch (e) { 
+            document.getElementById('loader-msg').innerText = "Error de conexión. Inténtalo de nuevo.";
+        }
     }
 
     function renderCards() {
         const list = document.getElementById('hist-list');
         list.innerHTML = "";
         const reversed = [...fullData].reverse();
+        
         reversed.forEach((d, i) => {
             const prev = reversed.slice(i + 1).find(p => p.perro === d.perro);
             let diffHtml = "";
@@ -262,6 +307,7 @@
                 const color = diff > 0 ? "#FF3B30" : (diff < 0 ? "#34C759" : "#8E8E93");
                 diffHtml = `<span class="trend" style="color:${color}">${diff > 0 ? '↑' : (diff < 0 ? '↓' : '●')} ${Math.abs(diff)}kg</span>`;
             }
+
             const tagLower = (d.etiqueta || "").toLowerCase();
             let tagClass = "card-tag"; 
             if(tagLower.includes('vete')) tagClass += ' tag-vete';
@@ -269,23 +315,51 @@
             else if(tagLower.includes('vacuna')) tagClass += ' tag-vacuna';
             else tagClass += ' tag-normal';
 
-            list.innerHTML += `<div class="card"><div class="card-left"><span class="card-date">${new Date(d.fecha).toLocaleDateString('es-ES', {day:'numeric', month:'short'})}</span><span class="card-perro" style="color:${d.perro === 'Riu' ? 'var(--riu-color)' : 'var(--sucre-color)'}">${d.perro}</span><span class="${tagClass}">${d.etiqueta}</span></div><div class="card-right"><div class="card-weight">${d.peso}kg ${diffHtml}</div><span class="card-age">${d.edad}</span></div></div>`;
+            list.innerHTML += `
+                <div class="card">
+                    <div class="card-left">
+                        <span class="card-date">${new Date(d.fecha).toLocaleDateString('es-ES', {day:'numeric', month:'short'})}</span>
+                        <span class="card-perro" style="color:${d.perro === 'Riu' ? 'var(--riu-color)' : 'var(--sucre-color)'}">${d.perro}</span>
+                        <span class="${tagClass}">${d.etiqueta}</span>
+                    </div>
+                    <div class="card-right">
+                        <div class="card-weight">${d.peso}kg ${diffHtml}</div>
+                        <span class="card-age">${d.edad}</span>
+                    </div>
+                </div>`;
         });
     }
 
     async function save() {
         const w = document.getElementById('inp-w').value;
         if(!w) return;
-        let finalTag = selectedTag === 'Otro' ? (document.getElementById('inp-custom-tag').value.trim() || 'Otro') : selectedTag;
+        
+        let finalTag = selectedTag;
+        if(selectedTag === 'Otro') {
+            const customVal = document.getElementById('inp-custom-tag').value.trim();
+            finalTag = customVal ? customVal : 'Otro'; 
+        }
+
         const loader = document.getElementById('loader-overlay');
-        document.getElementById('loader-msg').innerText = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-        loader.style.display = 'flex'; loader.style.opacity = '1';
+        const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        document.getElementById('loader-msg').innerText = randomMsg;
+        loader.style.display = 'flex'; 
+        loader.style.opacity = '1';
+
         try {
-            await fetch(URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ perro: selectedDog, peso: parseFloat(w), etiqueta: finalTag }) });
+            await fetch(URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify({ perro: selectedDog, peso: parseFloat(w), etiqueta: finalTag }) 
+            });
             document.getElementById('inp-w').value = "";
+            document.getElementById('inp-custom-tag').value = ""; 
+            
             await load();
             setTimeout(() => setView('hist'), 600);
-        } catch (e) { loader.style.display = 'none'; }
+        } catch (e) { 
+            document.getElementById('loader-msg').innerText = "Error al guardar. Revisa la conexión.";
+        }
     }
 </script>
 </body>
